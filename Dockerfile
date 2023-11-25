@@ -1,9 +1,16 @@
-# Backend uchun Dockerfile
-FROM adoptopenjdk:17-jre-hotspot
+FROM maven:3.9-eclipse-temurin-17-alpine AS MAVEN_BUILD
+
+MAINTAINER B29
+
+COPY pom.xml /build/
+COPY src /build/src/
+
+WORKDIR /build/
+RUN mvn package
+
+FROM openjdk:17-oracle
 
 WORKDIR /app
-COPY ./target/*.jar ./app.jar
 
-EXPOSE 8080
-
-CMD ["java", "-jar", "app.jar"]
+COPY --from=MAVEN_BUILD /build/target/Docker-API.jar /app/
+CMD ["java", "-jar", "Docker-API.jar"]
